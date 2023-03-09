@@ -1,4 +1,4 @@
-Clone the code in to dir
+Download the code into a directory
 
 Navigate to the dir in terminal and use below commands
 
