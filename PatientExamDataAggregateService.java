@@ -18,16 +18,18 @@ public class PatientExamDataAggregateService {
     public static Map<String, String> patientIdToName = new HashMap<>();
     public static Map<String, Set<String>> patientToExams = new HashMap<>();
 
-    //Method to read text file:
+    //Method to read input file and call patientDataAction() method for every line to execute its commant:
     public static void readFile(String fileName) {
-        //String fileName = "path/to/file.txt"; // specify the path of the file to be read
+        
+        //Logic to read input file line by line:
         try (BufferedReader br = new BufferedReader(new FileReader(fileName))) {
             String line;
             while ((line = br.readLine()) != null) {
-                System.out.println(line);
+                //Method call to validate and execute commond mentioned at current line:
                 patientDataAction(line);
             }
 
+            //Constructing output result set:
             Set<String> result = new HashSet<>();
             StringBuilder temp = new StringBuilder();
             for (String key : patientIdToName.keySet()) {
@@ -36,6 +38,7 @@ public class PatientExamDataAggregateService {
                 result.add(temp.toString());
                 temp.setLength(0);
             }
+            //Printing the result set:
             for (String element : result) {
                 System.out.println(element);
             }
@@ -45,13 +48,18 @@ public class PatientExamDataAggregateService {
         }
     }
 
+    //Method to validate and execute commant mentioned on each line of input file
     public static void patientDataAction(String line) {
         String[] lineArr = line.split("\\s+");
+        if(lineArr.length < 3){
+            return; // not a valid input cannot process this line
+        }
         String patientId, command, type;
         command = lineArr[0];
         type = lineArr[1];
         patientId = lineArr[2];
 
+        //Logic to execute commant at current line:
         if (command.equals("ADD")) {
             if (type.equals("PATIENT")) {
                 if (!patientIdToName.containsKey(patientId)) {
@@ -61,7 +69,7 @@ public class PatientExamDataAggregateService {
                     patientIdToName.put(patientId, name.toString().trim());
                 }
             }
-            if (type.equals("EXAM") && patientIdToName.containsKey(patientId)) {
+            if (type.equals("EXAM") && patientIdToName.containsKey(patientId) && lineArr.length > 3) {
                 String examId = lineArr[3];
                 if (!patientToExams.containsKey(patientId)) {
                     patientToExams.put(patientId, new HashSet<>());
@@ -75,7 +83,7 @@ public class PatientExamDataAggregateService {
                     patientToExams.remove(patientId);
             }
             if (type.equals("EXAM")) {
-                if (patientToExams.containsKey(patientId)) {
+                if (patientToExams.containsKey(patientId) && lineArr.length > 3) {
                     String examId = lineArr[3];
                     if (patientToExams.get(patientId).contains(examId)) {
                         patientToExams.get(patientId).remove(examId);
